@@ -74,6 +74,7 @@
                 type: 'GET',
                 url: 'teachers.json',
                 success: function (json_data) {
+                    $(".search-form").removeClass('d-none');
                     build_table_from_json_data(json_data);
                 }
             });
