@@ -1,0 +1,28 @@
+*{
+    box-sizing: border-box;
+}
+
+.container-fluid {
+    height: 100vh;
+}
+
+.data-loading-button{
+    box-shadow: 3px 3px 5px gray;
+}
+
+.data-loading-button:active{
+    transform: translate(3px, 3px);
+    -webkit-transform: translate(3px, 3px);
+    -moz-transform: translate(3px, 3px);
+    -ms-transform: translate(3px, 3px);
+    -o-transform: translate(3px, 3px);
+}
+
+.table-area{
+    scroll-behavior: smooth;
+}
+
+.teachers-table__columns-names > *{
+    position: sticky;
+    top: -5px;
+}
