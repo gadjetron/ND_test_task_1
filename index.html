@@ -28,5 +28,49 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        function build_table_from_json_data(json_data){
+            let parsed_data = JSON.parse(JSON.stringify(json_data));
+            let teachers = parsed_data.teachers;
+
+            let table_columns_names = Object.keys(teachers[0]);
+
+            let table_columns_elements = table_columns_names.map(function (column_name) {
+                let th_element = document.createElement('th');
+                th_element.innerText = column_name;
+
+                return th_element;
+            });
+
+            let table_head_row = $('.teachers-table__columns-names');
+            table_head_row.html(table_columns_elements);
+
+            let table_body = $('.teachers-table__table-body');
+            table_body.empty();
+
+            for (teacher of teachers) {
+                let table_row = document.createElement('tr');
+
+                for (column_name of table_columns_names) {
+                    let table_row_cell = document.createElement('td');
+                    table_row_cell.innerText = teacher[column_name];
+
+                    table_row.append(table_row_cell);
+                }
+
+                table_body.append(table_row);
+            }
+        }
+
+        $(".data-loading-button").on('click', () => {
+            $.ajax({
+                type: 'GET',
+                url: 'teachers.json',
+                success: function (json_data) {
+                    build_table_from_json_data(json_data);
+                }
+            });
+        })
+    </script>
 </body>
 </html>
