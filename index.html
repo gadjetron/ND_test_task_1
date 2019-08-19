@@ -67,6 +67,7 @@
 
                 for (teacher of teachers) {
                     let table_row = document.createElement('tr');
+                    table_row.title = `Строка ${teachers.indexOf(teacher) + 1}`;
 
                     for (column_name of table_columns_names) {
                         let table_row_cell = document.createElement('td');
