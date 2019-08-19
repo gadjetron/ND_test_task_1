@@ -36,36 +36,50 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
+        var table_columns_names;
+
+        var search_index = [];
+
+        var search_input = $(".search-form__search-input");
+
+        function parse_json(json){
+            return JSON.parse(JSON.stringify(json));
+        }
+
         function build_table_from_json_data(json_data){
-            let parsed_data = JSON.parse(JSON.stringify(json_data));
-            let teachers = parsed_data.teachers;
+            if ('teachers' in json_data) {
+                let teachers = json_data.teachers;
 
-            let table_columns_names = Object.keys(teachers[0]);
+                table_columns_names = Object.keys(teachers[0]);
 
-            let table_columns_elements = table_columns_names.map(function (column_name) {
-                let th_element = document.createElement('th');
-                th_element.innerText = column_name;
+                let table_columns_elements = table_columns_names.map(function (column_name) {
+                    let th_element = document.createElement('th');
+                    th_element.innerText = column_name;
 
-                return th_element;
-            });
+                    return th_element;
+                });
 
-            let table_head_row = $('.teachers-table__columns-names');
-            table_head_row.html(table_columns_elements);
+                let table_head_row = $('.teachers-table__columns-names');
+                table_head_row.html(table_columns_elements);
 
-            let table_body = $('.teachers-table__table-body');
-            table_body.empty();
+                let table_body = $('.teachers-table__table-body');
+                table_body.empty();
 
-            for (teacher of teachers) {
-                let table_row = document.createElement('tr');
+                for (teacher of teachers) {
+                    let table_row = document.createElement('tr');
 
-                for (column_name of table_columns_names) {
-                    let table_row_cell = document.createElement('td');
-                    table_row_cell.innerText = teacher[column_name];
+                    for (column_name of table_columns_names) {
+                        let table_row_cell = document.createElement('td');
+                        table_row_cell.innerText = teacher[column_name];
 
-                    table_row.append(table_row_cell);
+                        table_row.append(table_row_cell);
+                    }
+
+                    table_body.append(table_row);
                 }
-
-                table_body.append(table_row);
+            }
+            else {
+                throw new Error("Data is corrupted! 'teachers' field is not presented in data!")
             }
         }
 
@@ -74,11 +88,84 @@
                 type: 'GET',
                 url: 'teachers.json',
                 success: function (json_data) {
+                    let table_data = parse_json(json_data);
+
+                    build_table_from_json_data(table_data);
+                    build_search_index_from_json_data(table_data);
+
                     $(".search-form").removeClass('d-none');
-                    build_table_from_json_data(json_data);
                 }
             });
-        })
+        });
+
+        function build_search_index_from_json_data(json_data) {
+            if ('teachers' in json_data) {
+                json_data.teachers.forEach((teacher_obj) => {
+                    search_index.push(Object.values(teacher_obj));
+                });
+            }
+            else {
+                throw new Error("Data is corrupted! 'teachers' field is not presented in data!")
+            }
+        }
+
+        function highlight_matched_positions(matched_positions) {
+            let table_rows = $(".teachers-table__table-body tr");
+            let table_cells = $(".teachers-table__table-body td").toArray();
+
+            table_cells.forEach((cell) => {
+                cell.style.backgroundColor = "";
+            });
+
+            for (matched_position of matched_positions) {
+                let {row: matched_row,
+                    cell: matched_cell} = matched_position;
+
+                let current_row = table_rows[matched_row];
+
+                let current_row_cells = current_row.querySelectorAll('td');
+                let current_cell = current_row_cells[matched_cell];
+
+                current_cell.style.backgroundColor = "lightgreen";
+            }
+        }
+
+        function find_in_search_index(value){
+            let regexp = new RegExp(value, "gi");
+
+            let matched_positions = [];
+
+            Object.values(search_index).forEach((row, row_index) => {
+                Object.values(row).forEach((cell_value, cell_index) => {
+                    if (regexp.test(cell_value)) {
+                        matched_positions.push({
+                            'row': row_index,
+                            'cell': cell_index
+                        });
+                    }
+                })
+            });
+
+            highlight_matched_positions(matched_positions);
+        }
+
+        search_input.on('input', function () {
+            let search_query = this.value;
+            let table_cells = $(".teachers-table__table-body td").toArray();
+
+            if (search_query == "") {
+                table_cells.forEach((current_cell) => {
+                    current_cell.style.backgroundColor = "";
+                });
+            }
+            else {
+                find_in_search_index(search_query);
+            }
+        });
+
+        $(".search-form").on('submit', function () {
+            event.preventDefault();
+        });
     </script>
 </body>
 </html>
