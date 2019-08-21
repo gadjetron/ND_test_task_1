@@ -118,32 +118,15 @@
         function highlight_matched_positions(matched_positions) {
             reset_highlighting();
 
-            let matched_rows_nums = new Set(
-                matched_positions.map((matched_position) => {
-                    return matched_position.row;
-                })
-            );
-
-            for (matched_position of matched_positions) {
-                let {row: matched_row,
-                    cell: matched_cell} = matched_position;
+            for (matched_position of Object.entries(matched_positions)) {
+                let [matched_row,
+                    matched_cells] = matched_position;
 
                 let current_row = table_rows[matched_row];
+                current_row.classList.add('visible');
 
-                let current_row_cells = current_row.querySelectorAll('td');
-                let current_cell = current_row_cells[matched_cell];
-
-                current_cell.style.backgroundColor = "lightgreen";
-            }
-
-            for (matched_row_num of matched_rows_nums) {
-                for (table_row of Object.entries(table_rows.toArray())) {
-                    let [table_row_index,
-                        table_row_element] = table_row;
-
-                    if (matched_row_num == parseInt(table_row_index)) {
-                        table_row_element.classList.add('visible');
-                    }
+                for (matched_cell of matched_cells) {
+                    current_row.cells[matched_cell].style.backgroundColor = "lightgreen";
                 }
             }
 
@@ -153,17 +136,20 @@
         function find_in_search_index(value){
             let regexp = new RegExp(value, "gi");
 
-            let matched_positions = [];
+            let matched_positions = {};
 
             Object.values(search_index).forEach((row, row_index) => {
+                matched_positions[row_index] = [];
+
                 Object.values(row).forEach((cell_value, cell_index) => {
                     if (regexp.test(cell_value)) {
-                        matched_positions.push({
-                            'row': row_index,
-                            'cell': cell_index
-                        });
+                        matched_positions[row_index].push(cell_index);
                     }
-                })
+                });
+
+                if (matched_positions[row_index].length == 0) {
+                    delete matched_positions[row_index];
+                }
             });
 
             highlight_matched_positions(matched_positions);
