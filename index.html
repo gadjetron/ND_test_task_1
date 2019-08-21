@@ -69,13 +69,16 @@
                 let table_body = $('.teachers-table__table-body');
                 table_body.empty();
 
-                for (teacher of teachers) {
+                for (teacher of Object.entries(teachers)) {
+                    let [teacher_index,
+                        teacher_obj] = teacher;
+
                     let table_row = document.createElement('tr');
-                    table_row.title = `Строка ${teachers.indexOf(teacher) + 1}`;
+                    table_row.title = `Строка ${parseInt(teacher_index) + 1}`;
 
                     for (column_name of table_columns_names) {
                         let table_row_cell = document.createElement('td');
-                        table_row_cell.innerText = teacher[column_name];
+                        table_row_cell.innerText = teacher_obj[column_name];
 
                         table_row.append(table_row_cell);
                     }
