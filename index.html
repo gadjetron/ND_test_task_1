@@ -37,9 +37,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
         var table_columns_names;
+        var table_rows, table_cells;
 
         var search_index = [];
 
+        var data_loading_button = $(".data-loading-button");
+
+        var search_form = $(".search-form");
         var search_input = $(".search-form__search-input");
 
         function parse_json(json){
@@ -78,13 +82,17 @@
 
                     table_body.append(table_row);
                 }
+
+                table_rows = $(".teachers-table__table-body tr");
+                table_cells = $(".teachers-table__table-body td");
+
             }
             else {
                 throw new Error("Data is corrupted! 'teachers' field is not presented in data!")
             }
         }
 
-        $(".data-loading-button").on('click', () => {
+        data_loading_button.on('click', () => {
             $.ajax({
                 type: 'GET',
                 url: 'teachers.json',
@@ -94,7 +102,7 @@
                     build_table_from_json_data(table_data);
                     build_search_index_from_json_data(table_data);
 
-                    $(".search-form").removeClass('d-none');
+                    search_form.removeClass('d-none');
                 }
             });
         });
@@ -110,10 +118,7 @@
             }
         }
 
-        function highlight_matched_positions(matched_positions) {
-            let table_rows = $(".teachers-table__table-body tr");
-            let table_cells = $(".teachers-table__table-body td");
-
+        function reset_highlighting() {
             table_rows.each((row_index, table_row) => {
                 table_row.removeAttribute("class");
             });
@@ -121,6 +126,10 @@
             table_cells.each((cell_index, table_cell) => {
                 table_cell.style.backgroundColor = "";
             });
+        }
+
+        function highlight_matched_positions(matched_positions) {
+            reset_highlighting();
 
             let matched_rows_nums = new Set(
                 matched_positions.map((matched_position) => {
@@ -176,24 +185,15 @@
         search_input.on('input', function () {
             let search_query = this.value;
 
-            let table_rows = $(".teachers-table__table-body tr");
-            let table_cells = $(".teachers-table__table-body td");
-
             if (search_query == "") {
-                table_cells.each((cell_index, table_cell) => {
-                    table_cell.style.backgroundColor = "";
-                });
-
-                table_rows.each((row_index, table_row) => {
-                    table_row.removeAttribute("class");
-                });
+                reset_highlighting();
             }
             else {
                 find_in_search_index(search_query);
             }
         });
 
-        $(".search-form").on('submit', function () {
+        search_form.on('submit', function () {
             event.preventDefault();
         });
     </script>
