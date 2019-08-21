@@ -39,12 +39,11 @@
         var table_columns_names;
         var table_rows, table_cells;
 
+        var data_loading_button;
+
+        var search_form;
+        var search_input;
         var search_index = [];
-
-        var data_loading_button = $(".data-loading-button");
-
-        var search_form = $(".search-form");
-        var search_input = $(".search-form__search-input");
 
         function parse_json(json){
             return JSON.parse(JSON.stringify(json));
@@ -94,21 +93,6 @@
                 throw new Error("Data is corrupted! 'teachers' field is not presented in data!")
             }
         }
-
-        data_loading_button.on('click', () => {
-            $.ajax({
-                type: 'GET',
-                url: 'teachers.json',
-                success: function (json_data) {
-                    let table_data = parse_json(json_data);
-
-                    build_table_from_json_data(table_data);
-                    build_search_index_from_json_data(table_data);
-
-                    search_form.removeClass('d-none');
-                }
-            });
-        });
 
         function build_search_index_from_json_data(json_data) {
             if ('teachers' in json_data) {
@@ -185,20 +169,42 @@
             highlight_matched_positions(matched_positions);
         }
 
-        search_input.on('input', function () {
-            let search_query = this.value;
+        $(document).ready(() => {
+            data_loading_button = $(".data-loading-button");
 
-            if (search_query == "") {
-                reset_highlighting();
-            }
-            else {
-                find_in_search_index(search_query);
-            }
-        });
+            search_form = $(".search-form");
+            search_input = $(".search-form__search-input");
 
-        search_form.on('submit', function () {
-            event.preventDefault();
-        });
+            data_loading_button.on('click', () => {
+                $.ajax({
+                    type: 'GET',
+                    url: 'teachers.json',
+                    success: function (json_data) {
+                        let table_data = parse_json(json_data);
+
+                        build_table_from_json_data(table_data);
+                        build_search_index_from_json_data(table_data);
+
+                        search_form.removeClass('d-none');
+                    }
+                });
+            });
+
+            search_input.on('input', function () {
+                let search_query = this.value;
+
+                if (search_query == "") {
+                    reset_highlighting();
+                }
+                else {
+                    find_in_search_index(search_query);
+                }
+            });
+
+            search_form.on('submit', function () {
+                event.preventDefault();
+            });
+        })
     </script>
 </body>
 </html>
