@@ -112,11 +112,21 @@
 
         function highlight_matched_positions(matched_positions) {
             let table_rows = $(".teachers-table__table-body tr");
-            let table_cells = $(".teachers-table__table-body td").toArray();
+            let table_cells = $(".teachers-table__table-body td");
 
-            table_cells.forEach((cell) => {
-                cell.style.backgroundColor = "";
+            table_rows.each((row_index, table_row) => {
+                table_row.removeAttribute("class");
             });
+
+            table_cells.each((cell_index, table_cell) => {
+                table_cell.style.backgroundColor = "";
+            });
+
+            let matched_rows_nums = new Set(
+                matched_positions.map((matched_position) => {
+                    return matched_position.row;
+                })
+            );
 
             for (matched_position of matched_positions) {
                 let {row: matched_row,
@@ -129,6 +139,19 @@
 
                 current_cell.style.backgroundColor = "lightgreen";
             }
+
+            for (matched_row_num of matched_rows_nums) {
+                for (table_row of Object.entries(table_rows.toArray())) {
+                    let [table_row_index,
+                        table_row_element] = table_row;
+
+                    if (matched_row_num == parseInt(table_row_index)) {
+                        table_row_element.classList.add('visible');
+                    }
+                }
+            }
+
+            table_rows.not(".visible").addClass("d-none");
         }
 
         function find_in_search_index(value){
@@ -152,11 +175,17 @@
 
         search_input.on('input', function () {
             let search_query = this.value;
-            let table_cells = $(".teachers-table__table-body td").toArray();
+
+            let table_rows = $(".teachers-table__table-body tr");
+            let table_cells = $(".teachers-table__table-body td");
 
             if (search_query == "") {
-                table_cells.forEach((current_cell) => {
-                    current_cell.style.backgroundColor = "";
+                table_cells.each((cell_index, table_cell) => {
+                    table_cell.style.backgroundColor = "";
+                });
+
+                table_rows.each((row_index, table_row) => {
+                    table_row.removeAttribute("class");
                 });
             }
             else {
