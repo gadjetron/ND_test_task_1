@@ -133,16 +133,16 @@
             table_rows.not(".visible").addClass("d-none");
         }
 
-        function find_in_search_index(value){
-            let regexp = new RegExp(value, "gi");
-
+        function find_in_search_index(searched_value){
             let matched_positions = {};
 
             Object.values(search_index).forEach((row, row_index) => {
                 matched_positions[row_index] = [];
 
                 Object.values(row).forEach((cell_value, cell_index) => {
-                    if (regexp.test(cell_value)) {
+                    let match_is_found = cell_value.toLowerCase().includes(searched_value);
+
+                    if (match_is_found) {
                         matched_positions[row_index].push(cell_index);
                     }
                 });
@@ -177,7 +177,7 @@
             });
 
             search_input.on('input', function () {
-                let search_query = this.value;
+                let search_query = this.value.toLowerCase();
 
                 if (search_query == "") {
                     reset_highlighting();
